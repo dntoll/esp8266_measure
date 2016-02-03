@@ -22,7 +22,7 @@ void setup() {
 
     Serial.begin(115200);
    
-    WiFiMulti.addAP("cfnet", "JesusLever2010");
+    WiFiMulti.addAP("...", "...");
 
     pinMode(photoTransistorPin, INPUT);
     
