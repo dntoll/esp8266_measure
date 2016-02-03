@@ -18,16 +18,21 @@ const int photoTransistorPin = 2;
 int lastState = HIGH;
 unsigned long timeForLastState = -1;
 
+bool states[100];
+int times[100];
+
 void setup() {
 
     Serial.begin(115200);
-   
+    Serial.println("Starting up...");
     WiFiMulti.addAP("...", "...");
 
     pinMode(photoTransistorPin, INPUT);
     
     lastState = digitalRead(photoTransistorPin);
     timeForLastState = millis();
+
+    Serial.println("done setup...");
 }
 
 void checkServer(bool state, unsigned long elapsedTime) {
@@ -37,14 +42,15 @@ void checkServer(bool state, unsigned long elapsedTime) {
         // turn LED on:
         Serial.println(stateStr + ":" + elapsedTime);
 
-        String url = "/test/";
-        url = url + stateStr + ":" + elapsedTime;
+        String url = "/log/?state=";
+        url = url + stateStr + "&time=" + elapsedTime;
 
         
         HTTPClient http;
 
         Serial.print("[HTTP] begin...\n");
-        http.begin("www.familjentoll.se", 80, "/test/"); //HTTP
+        Serial.print(url + "\n");
+        http.begin("www.familjentoll.se", 80, url); //HTTP
 
         Serial.print("[HTTP] GET...\n");
         // start connection and send HTTP header
@@ -61,7 +67,9 @@ void checkServer(bool state, unsigned long elapsedTime) {
         } else {
             Serial.print("[HTTP] GET... failed, no connection or no HTTP server\n");
         }
-    }
+    } else {
+            Serial.print("[HTTP] GET... failed, no connection or no HTTP server\n");
+        }
 }
 
 void loop() {
@@ -69,11 +77,13 @@ void loop() {
     buttonState = digitalRead(photoTransistorPin);
 
     if (buttonState != lastState) {
+      Serial.println("swapp state.");
       unsigned long now = millis();
       checkServer(lastState, now - timeForLastState);
 
       lastState = buttonState;
       timeForLastState = now;
+      Serial.println("Done swapped state.");
     }
     
   
